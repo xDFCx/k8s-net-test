@@ -1,0 +1,128 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: network-test-rbac
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: net-test
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+    name: host-network
+spec:
+  selector:
+    matchLabels:
+      app: host-network
+  template:
+    metadata:
+      labels:
+        app: host-network
+    spec:
+      hostNetwork: true
+      containers:
+      - name: host-network-test-connectivity
+        image: "almalinux:9.4"
+        command: 
+        - /bin/bash
+        - -c
+        - |  
+TEST_SCRIPT_CONNECTIVITY
+      - name: host-network-tcp-server
+        image: "almalinux:9.4"
+        command: 
+        - /bin/bash
+        - -c
+        - |  
+          yum install -y nc ; nc -lk -p 5555
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+    name: pod-network
+spec:
+  selector:
+    matchLabels:
+      app: pod-network
+  template:
+    metadata:
+      labels:
+        app: pod-network
+    spec:
+      containers:
+      - name: pod-network-test-connectivity
+        image: "almalinux:9.4"
+        command: 
+        - /bin/bash
+        - -c
+        - |  
+TEST_SCRIPT_CONNECTIVITY
+      - name: pod-network-test-dns
+        image: "almalinux:9.4"
+        command: 
+        - /bin/bash
+        - -c
+        - |  
+TEST_SCRIPT_DNS
+      - name: pod-network-tcp-server
+        image: "almalinux:9.4"
+        command: 
+        - /bin/bash
+        - -c
+        - |  
+          yum install -y nc ; nc -lk -p 5555
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: host-network
+spec:
+  selector:
+    app: host-network
+  ports:
+  - protocol: TCP
+    port: 5555
+    name: tcp
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: pod-network
+spec:
+  selector:
+    app: pod-network
+  ports:
+  - protocol: TCP
+    port: 5555
+    name: tcp
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: host-network-headless
+spec:
+  clusterIP: None
+  selector:
+    app: host-network
+  ports:
+  - protocol: TCP
+    port: 5555
+    name: tcp
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: pod-network-headless
+spec:
+  clusterIP: None
+  selector:
+    app: pod-network
+  ports:
+  - protocol: TCP
+    port: 5555
+    name: tcp
