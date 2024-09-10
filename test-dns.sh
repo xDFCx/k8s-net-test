@@ -1,5 +1,4 @@
-# Installs netcat
-yum install -y nc
+apk add netcat-openbsd
 
 function test_connection() {
     local service_fqdn=$1
@@ -12,7 +11,6 @@ function test_connection() {
     echo "$(date): $service_fqdn - OK"
 }
 
-# Have a little snooze while we wait for the netcat servers in all the pods to start.
 sleep 30
 
 while true

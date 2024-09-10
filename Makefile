@@ -13,3 +13,4 @@ apply: yaml
 
 delete: yaml
 	kubectl delete -f test.yaml
+	rm -rf test.yaml

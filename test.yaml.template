@@ -27,19 +27,19 @@ spec:
       hostNetwork: true
       containers:
       - name: host-network-test-connectivity
-        image: "almalinux:9.4"
+        image: "alpine/k8s:1.29.8"
         command: 
         - /bin/bash
         - -c
         - |  
 TEST_SCRIPT_CONNECTIVITY
       - name: host-network-tcp-server
-        image: "almalinux:9.4"
+        image: "alpine/k8s:1.29.8"
         command: 
         - /bin/bash
         - -c
         - |  
-          yum install -y nc ; nc -lk -p 5555
+          apk add netcat-openbsd ; nc -lk -p 5555
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -56,26 +56,26 @@ spec:
     spec:
       containers:
       - name: pod-network-test-connectivity
-        image: "almalinux:9.4"
+        image: "alpine/k8s:1.29.8"
         command: 
         - /bin/bash
         - -c
         - |  
 TEST_SCRIPT_CONNECTIVITY
       - name: pod-network-test-dns
-        image: "almalinux:9.4"
+        image: "alpine/k8s:1.29.8"
         command: 
         - /bin/bash
         - -c
         - |  
 TEST_SCRIPT_DNS
       - name: pod-network-tcp-server
-        image: "almalinux:9.4"
+        image: "alpine/k8s:1.29.8"
         command: 
         - /bin/bash
         - -c
         - |  
-          yum install -y nc ; nc -lk -p 5555
+          apk add netcat-openbsd ; nc -lk -p 5555
 ---
 kind: Service
 apiVersion: v1
